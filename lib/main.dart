@@ -13,7 +13,7 @@ class MainApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'My Flutter App',
-      initialRoute: 'users',
+      initialRoute: 'chat',
       routes: appRoutes,
     );
   }

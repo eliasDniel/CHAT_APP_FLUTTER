@@ -1,5 +1,6 @@
 import 'package:app_chat_socket/models/user.dart';
 import 'package:flutter/material.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class UsersScreen extends StatefulWidget {
   const UsersScreen({super.key});
@@ -14,6 +15,10 @@ class _UsersScreenState extends State<UsersScreen> {
     User(online: false, email: 'user2@example.com', name: 'User 2', uid: '2'),
     User(online: true, email: 'user3@example.com', name: 'User 3', uid: '3'),
   ];
+
+  final RefreshController _refreshController = RefreshController(
+    initialRefresh: false,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -37,29 +42,55 @@ class _UsersScreenState extends State<UsersScreen> {
           ),
         ],
       ),
-      body: ListView.separated(
-        physics: BouncingScrollPhysics(),
-        itemBuilder: (context, index) {
-          final usuario = usuarios[index];
-          return ListTile(
-            leading: CircleAvatar(
-              backgroundColor: Colors.blue[100],
-              child: Text(usuario.name.substring(0, 2)),
-            ),
-            title: Text(usuario.name),
-            subtitle: Text(usuario.email),
-            trailing: Container(
-              width: 10,
-              height: 10,
-              decoration: BoxDecoration(
-                color: usuario.online ? Colors.green[300] : Colors.red,
-                borderRadius: BorderRadius.circular(100),
-              ),
-            ),
-          );
-        },
-        separatorBuilder: (_, index) => Divider(),
-        itemCount: usuarios.length,
+      body: SmartRefresher(
+        controller: _refreshController,
+        enablePullDown: true,
+        header: WaterDropHeader(
+          complete: Icon(Icons.check, color: Colors.blue[400]),
+          waterDropColor: Colors.blue[400]!,
+        ),
+        onRefresh: _cargandoUsers,
+        child: ListView.separated(
+          physics: BouncingScrollPhysics(),
+          itemBuilder: (context, index) {
+            final usuario = usuarios[index];
+            return CustomUser(usuario: usuario);
+          },
+          separatorBuilder: (_, index) => Divider(),
+          itemCount: usuarios.length,
+        ),
+      ),
+    );
+  }
+
+
+  void _cargandoUsers() async {
+    await Future.delayed(Duration(milliseconds: 1000));
+    _refreshController.refreshCompleted();
+  }
+}
+
+class CustomUser extends StatelessWidget {
+  const CustomUser({super.key, required this.usuario});
+
+  final User usuario;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: CircleAvatar(
+        backgroundColor: Colors.blue[100],
+        child: Text(usuario.name.substring(0, 2)),
+      ),
+      title: Text(usuario.name),
+      subtitle: Text(usuario.email),
+      trailing: Container(
+        width: 10,
+        height: 10,
+        decoration: BoxDecoration(
+          color: usuario.online ? Colors.green[300] : Colors.red,
+          borderRadius: BorderRadius.circular(100),
+        ),
       ),
     );
   }
