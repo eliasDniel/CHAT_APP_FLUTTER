@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class CustomBottom extends StatelessWidget {
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final String text;
   const CustomBottom({super.key, required this.onPressed, this.text = 'Ingrese'});
 

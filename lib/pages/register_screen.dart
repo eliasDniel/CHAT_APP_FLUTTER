@@ -1,8 +1,11 @@
+import 'package:app_chat_socket/helpers/mostraralerta.dart';
+import 'package:app_chat_socket/services/authservice.dart';
 import 'package:app_chat_socket/widgets/custom_bottom.dart';
 import 'package:app_chat_socket/widgets/input_widget.dart';
 import 'package:app_chat_socket/widgets/labels_widget.dart';
 import 'package:app_chat_socket/widgets/logo_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class RegisterScreen extends StatelessWidget {
   const RegisterScreen({super.key});
@@ -48,6 +51,7 @@ class _FormState extends State<_Form> {
   final passwordController = TextEditingController();
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AuthService>(context);
     return Container(
       margin: EdgeInsets.only(bottom: 30),
       padding: EdgeInsets.symmetric(horizontal: 50),
@@ -72,10 +76,26 @@ class _FormState extends State<_Form> {
           ),
 
           CustomBottom(
-            onPressed: () {
-              print(emailController.text);
-              print(passwordController.text);
-            },
+            onPressed: authService.autenticando
+                ? null
+                : () async {
+                    FocusScope.of(context).unfocus();
+                    final registerOk = await authService.register(
+                      nameController.text.trim(),
+                      emailController.text.trim(),
+                      passwordController.text.trim(),
+                    );
+                    if (registerOk == true) {
+                      Navigator.pushReplacementNamed(context, 'users');
+                    } else {
+                      // Mostrar alerta
+                      mostrarAlerta(
+                        context,
+                        'Registro incorrecto',
+                        registerOk,
+                      );
+                    }
+                  },
             text: 'Crear cuenta',
           ),
         ],
